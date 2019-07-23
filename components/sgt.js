@@ -10,10 +10,28 @@ class SGT_template {
 	*/
 	constructor(elementConfig) {
 		this.elementConfig = elementConfig; /* console.log elementConfig to note what data you have access to */
-		this.data = {};
 
+		this.data = {};
+			
+		this.domElements = {
+			row: null,
+			name: null,
+			course: null,
+			grade: null,
+			operations: null,
+			deleteButton: null
+		};
+		console.log('data',this.elementConfig );
+		
+		//console.log("idarray", object.keys(this.data));
+
+		this.addEventHandlers = this.addEventHandlers.bind(this);
+		this.handleAdd = this.handleAdd.bind(this);
+		this.handleCancel = this.handleCancel.bind(this);
+		this.clearInputs = this.clearInputs.bind(this);
 
 	}
+	
 
 	/* addEventHandlers - add event handlers to pre-made dom elements
 	make sure to use the element references that were passed into the constructor (see elementConfig)
@@ -25,6 +43,9 @@ class SGT_template {
 	*/
 	addEventHandlers() {
 
+		this.elementConfig.addButton.on("click",this.handleAdd);
+		this.elementConfig.cancelButton.on("click",this.handleCancel);
+
 
 	}
 
@@ -34,6 +55,9 @@ class SGT_template {
 	ESTIMATED TIME: 15 minutes
 	*/
 	clearInputs() {
+		$(this.elementConfig.nameInput).val("");
+		$(this.elementConfig.courseInput).val("");
+		$(this.elementConfig.gradeInput).val("");
 
 	}
 
@@ -43,6 +67,7 @@ class SGT_template {
 	ESTIMATED TIME: 15 minutes
 	*/
 	handleCancel() {
+		this.clearInputs();
 
 	}
 
@@ -67,7 +92,26 @@ class SGT_template {
 	return: false if unsuccessful in adding student, true if successful
 	ESTIMATED TIME: 1.5 hours
 	*/
-	createStudent() {
+	createStudent(name, course, grade, id) {
+		this.name = name;
+		this.course = course;
+		this.grade = grade;
+		this.id = id;
+
+		var newStudent = new Student;
+		this.newStudent = this.data;
+		this.doesStudentExist(id);
+		console.log("data", this.data);
+
+		if(!id){
+			this.data.id++;
+		}
+		else{
+			return false;
+		}
+
+
+		
 
 	}
 
@@ -80,7 +124,18 @@ class SGT_template {
 	return: false if id is undefined or that student doesn't exist, true if the student does exist
 	ESTIMATED TIME: 15 minutes
 	*/
-	doesStudentExist() {
+	doesStudentExist(id) {
+		this.idArray = object.keys(this.data);
+		console.log("idarray", idArray);
+
+		for(var i = 0; i <= idArray.length; i++){
+			if(id === idArray[i]){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
 
 	}
 
@@ -95,6 +150,10 @@ class SGT_template {
 	ESTIMATED TIME: 1 hour
 	*/
 	handleAdd() {
+		this.createStudent();
+
+
+		this.clearInputs();
 
 	}
 
