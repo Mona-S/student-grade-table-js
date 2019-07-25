@@ -13,23 +13,24 @@ class SGT_template {
 
 		this.data = {};
 			
-		this.domElements = {
-			row: null,
-			name: null,
-			course: null,
-			grade: null,
-			operations: null,
-			deleteButton: null
-		};
-		console.log('data',this.elementConfig );
+		// this.domElements = {
+		// 	row: null,
+		// 	name: null,
+		// 	course: null,
+		// 	grade: null,
+		// 	operations: null,
+		// 	deleteButton: null
+		// };
 		
-		//console.log("idarray", object.keys(this.data));
 
 		this.addEventHandlers = this.addEventHandlers.bind(this);
 		this.handleAdd = this.handleAdd.bind(this);
 		this.handleCancel = this.handleCancel.bind(this);
 		this.clearInputs = this.clearInputs.bind(this);
 		this.doesStudentExist = this.doesStudentExist.bind(this);
+		//this.displayAllStudents = this.displayAllStudents.bind(this);
+		this.displayAverage = this.displayAverage.bind(this);
+		this.deleteStudent = this.deleteStudent.bind(this);
 
 	}
 	
@@ -93,15 +94,11 @@ class SGT_template {
 	return: false if unsuccessful in adding student, true if successful
 	ESTIMATED TIME: 1.5 hours
 	*/
-	createStudent(name, course, grade , id) {
-		// console.log('id', id);
-		// console.log('name', name);
-		// console.log('course', course);
-		// console.log('grade', grade);
+	createStudent(name, course, grade , id, deleteStudent) {
 		
-		if(typeof name !== "undefined" || typeof grade !== "undefined" || typeof course !== "undefined"){
-			var newStudent = new Student(id, name, course, grade);
-			console.log("newStudent", newStudent);
+		// if(typeof name !== "undefined" || typeof grade !== "undefined" || typeof course !== "undefined"){
+		// 	var newStudent = new Student(id, name, course, grade);
+		// 	console.log("newStudent", newStudent);
 		
 		if(id){
 			
@@ -118,20 +115,20 @@ class SGT_template {
 			// console.log("keys length", objectId.length);
 			var nextId = objectId.length + 1;
 
-			for (var i = 0 ; i <= objectId.length; i++){
+			for (var i = 0 ; i < objectId.length; i++){
 				if((objectId[i+1] - objectId[i]!= 1)){	
 					nextId = parseInt(objectId[i]) + 1;
 					break;
 				}	
 			}
 	
-			this.data[nextId] = new Student(nextId, name, course, grade);
+			this.data[nextId] = new Student(nextId, name, course, grade, this.deleteStudent);
 			console.log('added',this.data[nextId]);
 			
-		}
+		
 	}
-	console.log(this.data);
-	return false;
+	
+	
 	
 }
 
@@ -161,14 +158,18 @@ class SGT_template {
 	ESTIMATED TIME: 1 hour
 	*/
 	handleAdd() {
+		console.log("this.data1", this.data);
+		console.log("studentname", studentName);
+
 		var studentName = $(this.elementConfig.nameInput).val();
 		var courseName = $(this.elementConfig.courseInput).val();
 		var gradeVal = $(this.elementConfig.gradeInput).val();
 		var studentID = null;
-		this.createStudent(studentName, courseName , gradeVal, studentID);
 
+		this.createStudent(studentName, courseName , gradeVal, studentID);
 		this.clearInputs();
 
+		console.log("this.data2", this.data);
 
 	}
 
@@ -212,24 +213,16 @@ class SGT_template {
 	ESTIMATED TIME: 1.5 hours
 	*/
 	displayAllStudents() {
+		$("#displayArea").empty();
 		var studentDetails =  Object.keys(this.data);
 		console.log("data", studentDetails);
-		for (var i = 1; i <= studentDetails.length; i++){	
-
-			console.log('stude', this.data[i].data.name);
-			
-		};
-			// this.domElements = { 
-			// 	row = studentDetails[i].data.id,
-			// 	name = studentDetails[i].data.name,
-			// 	course = studentDetails[i].data.course,
-			// 	grade = studentDetails[i].data.grade,
-			// 	operations: null,
-			// 	deleteButton: null
-			// 	};
 		
-
-
+		for(var key in this.data){
+		
+			$("#displayArea").append(this.data[key].render());
+				
+		}
+		this.displayAverage();
 
 	}
 
@@ -243,6 +236,18 @@ class SGT_template {
 	*/
 
 	displayAverage() {
+		
+		var allGrades = Object.keys(this.data);
+		var gradeSum = 0;
+
+		for(var key in this.data){
+			gradeSum += this.data[key].data.grade;
+			
+		}
+		var avg = gradeSum / allGrades.length;
+		avg = avg.toFixed(2);
+		
+		$(".avgGrade").append(avg);
 
 	}
 
@@ -259,8 +264,14 @@ class SGT_template {
 		true if it was successful, false if not
 		ESTIMATED TIME: 30 minutes
 	*/
-	deleteStudent() {
-
+	deleteStudent(id) {
+		if(this.data[id]){
+			delete this.createStudent();
+			return true;
+		}
+		return false;
+		
+	
 	}
 
 	/* updateStudent -
