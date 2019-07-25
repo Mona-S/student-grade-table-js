@@ -29,6 +29,7 @@ class SGT_template {
 		this.handleAdd = this.handleAdd.bind(this);
 		this.handleCancel = this.handleCancel.bind(this);
 		this.clearInputs = this.clearInputs.bind(this);
+		this.doesStudentExist = this.doesStudentExist.bind(this);
 
 	}
 	
@@ -92,28 +93,47 @@ class SGT_template {
 	return: false if unsuccessful in adding student, true if successful
 	ESTIMATED TIME: 1.5 hours
 	*/
-	createStudent(name, course, grade, id) {
-		this.name = name;
-		this.course = course;
-		this.grade = grade;
-		this.id = id;
-
-		var newStudent = new Student;
-		this.newStudent = this.data;
-		this.doesStudentExist(id);
-		console.log("data", this.data);
-
-		if(!id){
-			this.data.id++;
-		}
-		else{
-			return false;
-		}
-
-
+	createStudent(name, course, grade , id) {
+		// console.log('id', id);
+		// console.log('name', name);
+		// console.log('course', course);
+		// console.log('grade', grade);
 		
+		if(typeof name !== "undefined" || typeof grade !== "undefined" || typeof course !== "undefined"){
+			var newStudent = new Student(id, name, course, grade);
+			console.log("newStudent", newStudent);
+		
+		if(id){
+			
+			if(this.doesStudentExist(id)){
+			return false;
+			}
+			this.data[id] = new Student(id, name, course, grade);
+			
+			return true;
+		
+		}else {
+			var objectId = Object.keys(this.data);
+			// console.log("keys", Object.keys(this.data));
+			// console.log("keys length", objectId.length);
+			var nextId = objectId.length + 1;
 
+			for (var i = 0 ; i <= objectId.length; i++){
+				if((objectId[i+1] - objectId[i]!= 1)){	
+					nextId = parseInt(objectId[i]) + 1;
+					break;
+				}	
+			}
+	
+			this.data[nextId] = new Student(nextId, name, course, grade);
+			console.log('added',this.data[nextId]);
+			
+		}
 	}
+	console.log(this.data);
+	return false;
+	
+}
 
 	/* doesStudentExist -
 		determines if a student exists by ID.  returns true if yes, false if no
@@ -125,18 +145,9 @@ class SGT_template {
 	ESTIMATED TIME: 15 minutes
 	*/
 	doesStudentExist(id) {
-		this.idArray = object.keys(this.data);
-		console.log("idarray", idArray);
-
-		for(var i = 0; i <= idArray.length; i++){
-			if(id === idArray[i]){
-				return true;
-			}
-			else{
-				return false;
-			}
-		}
-
+		
+		return this.data.hasOwnProperty(id);
+		
 	}
 
 	/* handleAdd - function to handle the add button click
@@ -150,10 +161,14 @@ class SGT_template {
 	ESTIMATED TIME: 1 hour
 	*/
 	handleAdd() {
-		this.createStudent();
-
+		var studentName = $(this.elementConfig.nameInput).val();
+		var courseName = $(this.elementConfig.courseInput).val();
+		var gradeVal = $(this.elementConfig.gradeInput).val();
+		var studentID = null;
+		this.createStudent(studentName, courseName , gradeVal, studentID);
 
 		this.clearInputs();
+
 
 	}
 
@@ -169,7 +184,18 @@ class SGT_template {
 		a singular Student object if an ID was given, an array of Student objects if no ID was given
 		ESTIMATED TIME: 45 minutes
 	*/
-	readStudent() {
+	readStudent(id) {
+		//console.log('students', Object.values(this.data));
+		if( ! id) {
+			return Object.values(this.data);
+		} else {
+			if(this.doesStudentExist(id)){
+				return this.data[id];
+			}
+			else{
+				return false;
+			}
+		}
 
 	}
 
@@ -186,6 +212,24 @@ class SGT_template {
 	ESTIMATED TIME: 1.5 hours
 	*/
 	displayAllStudents() {
+		var studentDetails =  Object.keys(this.data);
+		console.log("data", studentDetails);
+		for (var i = 1; i <= studentDetails.length; i++){	
+
+			console.log('stude', this.data[i].data.name);
+			
+		};
+			// this.domElements = { 
+			// 	row = studentDetails[i].data.id,
+			// 	name = studentDetails[i].data.name,
+			// 	course = studentDetails[i].data.course,
+			// 	grade = studentDetails[i].data.grade,
+			// 	operations: null,
+			// 	deleteButton: null
+			// 	};
+		
+
+
 
 	}
 
