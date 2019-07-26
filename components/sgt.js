@@ -12,25 +12,17 @@ class SGT_template {
 		this.elementConfig = elementConfig; /* console.log elementConfig to note what data you have access to */
 
 		this.data = {};
-			
-		// this.domElements = {
-		// 	row: null,
-		// 	name: null,
-		// 	course: null,
-		// 	grade: null,
-		// 	operations: null,
-		// 	deleteButton: null
-		// };
-		
-
+		 
 		this.addEventHandlers = this.addEventHandlers.bind(this);
 		this.handleAdd = this.handleAdd.bind(this);
 		this.handleCancel = this.handleCancel.bind(this);
 		this.clearInputs = this.clearInputs.bind(this);
 		this.doesStudentExist = this.doesStudentExist.bind(this);
-		//this.displayAllStudents = this.displayAllStudents.bind(this);
+		this.displayAllStudents = this.displayAllStudents.bind(this);
 		this.displayAverage = this.displayAverage.bind(this);
 		this.deleteStudent = this.deleteStudent.bind(this);
+		this.retrieveData = this.retrieveData.bind(this);
+		this.handleDataFromServer = this.handleDataFromServer.bind(this);
 
 	}
 	
@@ -47,6 +39,7 @@ class SGT_template {
 
 		this.elementConfig.addButton.on("click",this.handleAdd);
 		this.elementConfig.cancelButton.on("click",this.handleCancel);
+		this.elementConfig.retrieveButton.on("click",this.retrieveData);
 
 
 	}
@@ -123,12 +116,10 @@ class SGT_template {
 			}
 	
 			this.data[nextId] = new Student(nextId, name, course, grade, this.deleteStudent);
-			console.log('added',this.data[nextId]);
+			//console.log('added',this.data[nextId]);
 			
 		
 	}
-	
-	
 	
 }
 
@@ -215,7 +206,7 @@ class SGT_template {
 	displayAllStudents() {
 		$("#displayArea").empty();
 		var studentDetails =  Object.keys(this.data);
-		console.log("data", studentDetails);
+		//console.log("data", studentDetails);
 		
 		for(var key in this.data){
 		
@@ -236,16 +227,26 @@ class SGT_template {
 	*/
 
 	displayAverage() {
+
 		
 		var allGrades = Object.keys(this.data);
 		var gradeSum = 0;
+		var avg = 0;
+
 
 		for(var key in this.data){
-			gradeSum += this.data[key].data.grade;
+			if(isNaN(this.data[key].data.grade)){
+
+				
+			}
+			else{
+				gradeSum += this.data[key].data.grade;
+			}
 			
 		}
-		var avg = gradeSum / allGrades.length;
+		avg = gradeSum / allGrades.length;
 		avg = avg.toFixed(2);
+		console.log("avg", avg);
 		
 		$(".avgGrade").append(avg);
 
@@ -293,4 +294,53 @@ class SGT_template {
 	updateStudent() {
 
 	}
+
+	handleDataFromServer(result){
+		console.log('Handle Data from Server:', result);
+
+			if(result){
+			for(var i = 0; i < result.data.length; i++){
+				var newstudent = this.createStudent(name, course, grade);
+				
+				var name = result.data[i].name;
+				
+				var course = result.data[i].course;
+				var grade = result.data[i].grade;				
+			}
+			
+		}
+			
+		this.displayAllStudents();
+			
+	}
+
+
+	handleError(result){
+		if(result === "error"){
+			return false;
+		}
+	}
+
+
+	retrieveData(){
+		
+		var ajaxConfigObject = {
+			dataType: 'json',
+			url: "http://s-apis.learningfuze.com/sgt/get",
+			method: "post",
+			data: {api_key: "Ke3qZVF5U2"},
+
+			success: this.handleDataFromServer,
+
+			error: this.handleError,
+		
+		}
+
+		$.ajax(ajaxConfigObject);
+
+	}
+
 }
+
+
+	
