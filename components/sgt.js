@@ -20,12 +20,14 @@ class SGT_template {
 		this.doesStudentExist = this.doesStudentExist.bind(this);
 		this.displayAllStudents = this.displayAllStudents.bind(this);
 		this.displayAverage = this.displayAverage.bind(this);
-		this.deleteStudent = this.deleteStudent.bind(this);
+		this.deleteStudentFromServer = this.deleteStudentFromServer.bind(this);
 		this.retrieveData = this.retrieveData.bind(this);
 		this.handleDataFromServer = this.handleDataFromServer.bind(this);
 		this.handleSuccessAddStudentToServer = this.handleSuccessAddStudentToServer.bind(this);
 		this.handleErrorAddStudentToServer = this.handleErrorAddStudentToServer.bind(this);
 		this.addStudentToServer = this.addStudentToServer.bind(this);
+		this.handleSuccessDeleteStudentToServer = this.handleSuccessDeleteStudentToServer.bind(this);
+		this.handleErrorDeleteStudentToServer = this.handleErrorDeleteStudentToServer.bind(this);
 
 	}
 	
@@ -90,7 +92,7 @@ class SGT_template {
 	return: false if unsuccessful in adding student, true if successful
 	ESTIMATED TIME: 1.5 hours
 	*/
-	createStudent(name, course, grade , id, deleteStudent) {
+	createStudent(name, course, grade , id, deleteStudentFromServer) {
 		
 		// if(typeof name !== "undefined" || typeof grade !== "undefined" || typeof course !== "undefined"){
 		// 	var newStudent = new Student(id, name, course, grade);
@@ -101,7 +103,7 @@ class SGT_template {
 			if(this.doesStudentExist(id)){
 			return false;
 			}
-			this.data[id] = new Student(id, name, course, grade);
+			this.data[id] = new Student(id, name, course, grade, this.deleteStudentFromServer);
 			
 			return true;
 		
@@ -118,7 +120,7 @@ class SGT_template {
 				}	
 			}
 	
-			this.data[nextId] = new Student(nextId, name, course, grade, this.deleteStudent);
+			this.data[nextId] = new Student(nextId, name, course, grade, this.deleteStudentFromServer);
 			//console.log('added',this.data[nextId]);
 			
 		
@@ -288,7 +290,7 @@ class SGT_template {
 		avg = avg.toFixed(2);
 		console.log("avg", avg);
 		
-		$(".avgGrade").append(avg);
+		$(".avgGrade").text(avg);
 
 	}
 
@@ -305,15 +307,50 @@ class SGT_template {
 		true if it was successful, false if not
 		ESTIMATED TIME: 30 minutes
 	*/
-	deleteStudent(id) {
+	deleteStudentFromServer(id) {
 		if(this.data[id]){
 			delete this.createStudent();
-			return true;
+			//return true;
 		}
-		return false;
+		//return false;
+
+		console.log('delete', id);
+		console.log(this.data[id].data.id);
+		console.log(this.data);
+
+		var ajaxConfigObject = {
+			dataType: 'json',
+			url: "http://s-apis.learningfuze.com/sgt/delete",
+			method: "post",
+			data: {api_key: "Ke3qZVF5U2", "student_id": id},
+
+			success: this.handleSuccessDeleteStudentToServer,
+
+			error: this.handleErrorDeleteStudentToServer,
 		
-	
+		}
+
+		$.ajax(ajaxConfigObject);
+			
 	}
+
+	handleSuccessDeleteStudentToServer(result){
+		if(result){
+			console.log('delete success', result	);
+			//this.data;
+			this.retrieveData();
+		}
+
+	}
+
+	handleErrorDeleteStudentToServer(result){
+		if(!result){
+
+			return false;
+		}
+
+	}
+
 
 	/* updateStudent -
 		*** not used for now.  Will be used later ***
@@ -336,16 +373,20 @@ class SGT_template {
 	}
 
 	handleDataFromServer(result){
-		console.log('Handle Data from Server:', result);
+		console.log('Handle Data from Server:', result.success);
+		console.log("data", result);
 
-			if(result){
+			if(result.success){
+				this.data = {};
 			for(var i = 0; i < result.data.length; i++){
-				var newstudent = this.createStudent(name, course, grade);
-				
 				var name = result.data[i].name;
-				
 				var course = result.data[i].course;
-				var grade = result.data[i].grade;				
+				var grade = result.data[i].grade;	
+				var id = result.data[i].id;
+
+				var newstudent = this.createStudent(name, course, grade, id);
+				
+							
 			}
 			
 		}
@@ -356,7 +397,7 @@ class SGT_template {
 
 
 	handleError(result){
-		if(result === "error"){
+		if(!result){
 			return false;
 		}
 	}
