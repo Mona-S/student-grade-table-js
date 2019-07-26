@@ -23,6 +23,9 @@ class SGT_template {
 		this.deleteStudent = this.deleteStudent.bind(this);
 		this.retrieveData = this.retrieveData.bind(this);
 		this.handleDataFromServer = this.handleDataFromServer.bind(this);
+		this.handleSuccessAddStudentToServer = this.handleSuccessAddStudentToServer.bind(this);
+		this.handleErrorAddStudentToServer = this.handleErrorAddStudentToServer.bind(this);
+		this.addStudentToServer = this.addStudentToServer.bind(this);
 
 	}
 	
@@ -158,11 +161,48 @@ class SGT_template {
 		var studentID = null;
 
 		this.createStudent(studentName, courseName , gradeVal, studentID);
+		this.addStudentToServer(studentName, courseName , gradeVal);
 		this.clearInputs();
 
 		console.log("this.data2", this.data);
+		
 
 	}
+
+
+	addStudentToServer(studentName, studentCourse, studentGrade){
+		var ajaxConfigObject = {
+			dataType: 'json',
+			url: "http://s-apis.learningfuze.com/sgt/create",
+			method: "post",
+			data: {"api_key": "Ke3qZVF5U2", "name": studentName, "course": studentCourse, "grade": studentGrade},
+
+			success: this.handleSuccessAddStudentToServer,
+
+			error: this.handleErrorAddStudentToServer,
+		
+		}
+
+		$.ajax(ajaxConfigObject);
+
+	}
+
+	handleSuccessAddStudentToServer(result){
+		if(result){
+			this.retrieveData();
+		}
+
+
+	}
+
+	handleErrorAddStudentToServer(result){
+		if(result === "error"){
+			return false;
+		}
+
+	}
+
+	
 
 	/* readStudent -
 		get the data for one or all students
