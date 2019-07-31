@@ -190,6 +190,7 @@ class SGT_template {
 	}
 
 	handleSuccessAddStudentToServer(result){
+		console.log("result", result);
 		if(result){
 			this.retrieveData();
 		}
@@ -308,10 +309,10 @@ class SGT_template {
 		ESTIMATED TIME: 30 minutes
 	*/
 	deleteStudentFromServer(id) {
-		if(this.data[id]){
-			delete this.createStudent();
-			//return true;
-		}
+		// if(this.data[id]){
+		// 	delete this.createStudent();
+		// 	//return true;
+		// }
 		//return false;
 
 		console.log('delete', id);
@@ -374,7 +375,7 @@ class SGT_template {
 
 	handleDataFromServer(result){
 		console.log('Handle Data from Server:', result.success);
-		console.log("data", result);
+		console.log("dataclue", result);
 
 			if(result.success){
 				this.data = {};
@@ -409,7 +410,9 @@ class SGT_template {
 			dataType: 'json',
 			url: "http://s-apis.learningfuze.com/sgt/get",
 			method: "post",
-			data: {api_key: "Ke3qZVF5U2"},
+			data: {
+				api_key: "Ke3qZVF5U2"
+			},
 
 			success: this.handleDataFromServer,
 
