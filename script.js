@@ -13,19 +13,20 @@ function startApp(){
 	startTests will test your code.  Once it works, 
 	delete startTests and uncomment the code below to run YOUR code and test it
 	*/
-	intiateTestDisplay();
-	startTests();
+	// intiateTestDisplay();
+	// startTests();
 
-	// SGT = new SGT_template({
-	// 	addButton: $("#addButton"),
-	// 	cancelButton: $("#cancelButton"),
-	// 	nameInput: $("#studentName"),
-	// 	courseInput: $("#studentCourse"),
-	// 	gradeInput: $("#studentGrade"),
-	// 	displayArea: $("#displayArea"),
-	// 	averageArea: $(".avgGrade")
-	// });
-	// SGT.addEventHandlers();
+	SGT = new SGT_template({
+		addButton: $("#addButton"),
+		cancelButton: $("#cancelButton"),
+		nameInput: $("#studentName"),
+		courseInput: $("#studentCourse"),
+		gradeInput: $("#studentGrade"),
+		displayArea: $("#displayArea"),
+		averageArea: $(".avgGrade"),
+		retrieveButton: $("#retrieveButton")
+	});
+	SGT.addEventHandlers();
 }
 
 

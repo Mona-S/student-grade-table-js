@@ -44,7 +44,7 @@ class Student {
 	ESTIMATED TIME: 30 minutes
 	*/
 	getData() {
-
+		return this.data;
 	}
 
 	/* render - create and return a table row (TR) with 4 table cells (TD) in them:
@@ -65,6 +65,29 @@ class Student {
 	ESTIMATED TIME: 2 hours
 	*/
 	render() {
+		var domElementRow = $("<tr>");
+		var firstTD = $("<td>").text(this.data.name);
+		domElementRow.append(firstTD);
+
+		var secondTD = $("<td>").text(this.data.course);
+		domElementRow.append(secondTD);
+
+		var thirdTD = $("<td>").text(this.data.grade);
+		domElementRow.append(thirdTD);
+
+		var fourthTD = $("<td>").text(this.data.operations);
+		var deleteButton = $("<button>").text("delete").on("click", this.handleDelete);
+		fourthTD.append(deleteButton);
+		domElementRow.append(fourthTD);
+
+		this.domElements.row = domElementRow;
+		this.domElements.name = firstTD;
+		this.domElements.course = secondTD;
+		this.domElements.grade = thirdTD;
+		this.domElements.operations = fourthTD;
+
+
+		return domElementRow;
 
 	}
 
@@ -76,6 +99,8 @@ class Student {
 	ESTIMATED TIME: 15 minutes
 	*/
 	handleDelete() {
+		this.deleteCallback(this.data.id);
+		this.domElements.row.remove();
 
 	}
 
@@ -95,7 +120,43 @@ class Student {
 	return: (boolean) true if it was changed, false if it was not
 	ESTIMATED TIME: 1.5 hours
 	*/
-	update() {
+	update(field, value) {
+		switch(field){
+			case "id":
+				this.data.id = value;
+				this.domElements.id.text(value);
+				this.domElements.id = value;
+				return true;
+				break;
+			case "name":
+				this.data.name = value;
+				this.domElements.name.text(value);
+				this.domElements.name = value;
+				return true;
+				break;
+			case "course":
+				this.data.course = value;
+				this.domElements.course.text(value);
+				this.domElements.course = value;
+				return true;
+				break;
+				
+			case "grade":
+				this.data.grade = parseInt(value);
+				this.domElements.grade.text(value);
+				this.domElements.grade = value;
+				return true;
+				break;
+			default:
+				return false;
+		
+		}
+		
+	
+		
+		
+
+
 
 	}
 }

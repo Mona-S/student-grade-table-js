@@ -10,10 +10,27 @@ class SGT_template {
 	*/
 	constructor(elementConfig) {
 		this.elementConfig = elementConfig; /* console.log elementConfig to note what data you have access to */
-		this.data = {};
 
+		this.data = {};
+		 
+		this.addEventHandlers = this.addEventHandlers.bind(this);
+		this.handleAdd = this.handleAdd.bind(this);
+		this.handleCancel = this.handleCancel.bind(this);
+		this.clearInputs = this.clearInputs.bind(this);
+		this.doesStudentExist = this.doesStudentExist.bind(this);
+		this.displayAllStudents = this.displayAllStudents.bind(this);
+		this.displayAverage = this.displayAverage.bind(this);
+		this.deleteStudentFromServer = this.deleteStudentFromServer.bind(this);
+		this.retrieveData = this.retrieveData.bind(this);
+		this.handleDataFromServer = this.handleDataFromServer.bind(this);
+		this.handleSuccessAddStudentToServer = this.handleSuccessAddStudentToServer.bind(this);
+		this.handleErrorAddStudentToServer = this.handleErrorAddStudentToServer.bind(this);
+		this.addStudentToServer = this.addStudentToServer.bind(this);
+		this.handleSuccessDeleteStudentToServer = this.handleSuccessDeleteStudentToServer.bind(this);
+		this.handleErrorDeleteStudentToServer = this.handleErrorDeleteStudentToServer.bind(this);
 
 	}
+	
 
 	/* addEventHandlers - add event handlers to pre-made dom elements
 	make sure to use the element references that were passed into the constructor (see elementConfig)
@@ -25,6 +42,10 @@ class SGT_template {
 	*/
 	addEventHandlers() {
 
+		this.elementConfig.addButton.on("click",this.handleAdd);
+		this.elementConfig.cancelButton.on("click",this.handleCancel);
+		this.elementConfig.retrieveButton.on("click",this.retrieveData);
+
 
 	}
 
@@ -34,6 +55,9 @@ class SGT_template {
 	ESTIMATED TIME: 15 minutes
 	*/
 	clearInputs() {
+		$(this.elementConfig.nameInput).val("");
+		$(this.elementConfig.courseInput).val("");
+		$(this.elementConfig.gradeInput).val("");
 
 	}
 
@@ -43,6 +67,7 @@ class SGT_template {
 	ESTIMATED TIME: 15 minutes
 	*/
 	handleCancel() {
+		this.clearInputs();
 
 	}
 
@@ -67,9 +92,41 @@ class SGT_template {
 	return: false if unsuccessful in adding student, true if successful
 	ESTIMATED TIME: 1.5 hours
 	*/
-	createStudent() {
+	createStudent(name, course, grade , id, deleteStudentFromServer) {
+		
+		// if(typeof name !== "undefined" || typeof grade !== "undefined" || typeof course !== "undefined"){
+		// 	var newStudent = new Student(id, name, course, grade);
+		// 	console.log("newStudent", newStudent);
+		
+		if(id){
+			
+			if(this.doesStudentExist(id)){
+			return false;
+			}
+			this.data[id] = new Student(id, name, course, grade, this.deleteStudentFromServer);
+			
+			return true;
+		
+		}else {
+			var objectId = Object.keys(this.data);
+			// console.log("keys", Object.keys(this.data));
+			// console.log("keys length", objectId.length);
+			var nextId = objectId.length + 1;
 
+			for (var i = 0 ; i < objectId.length; i++){
+				if((objectId[i+1] - objectId[i]!= 1)){	
+					nextId = parseInt(objectId[i]) + 1;
+					break;
+				}	
+			}
+	
+			this.data[nextId] = new Student(nextId, name, course, grade, this.deleteStudentFromServer);
+			//console.log('added',this.data[nextId]);
+			
+		
 	}
+	
+}
 
 	/* doesStudentExist -
 		determines if a student exists by ID.  returns true if yes, false if no
@@ -80,8 +137,10 @@ class SGT_template {
 	return: false if id is undefined or that student doesn't exist, true if the student does exist
 	ESTIMATED TIME: 15 minutes
 	*/
-	doesStudentExist() {
-
+	doesStudentExist(id) {
+		
+		return this.data.hasOwnProperty(id);
+		
 	}
 
 	/* handleAdd - function to handle the add button click
@@ -95,8 +154,58 @@ class SGT_template {
 	ESTIMATED TIME: 1 hour
 	*/
 	handleAdd() {
+		console.log("this.data1", this.data);
+		console.log("studentname", studentName);
+
+		var studentName = $(this.elementConfig.nameInput).val();
+		var courseName = $(this.elementConfig.courseInput).val();
+		var gradeVal = $(this.elementConfig.gradeInput).val();
+		var studentID = null;
+
+		this.createStudent(studentName, courseName , gradeVal, studentID);
+		this.addStudentToServer(studentName, courseName , gradeVal);
+		this.clearInputs();
+
+		console.log("this.data2", this.data);
+		
 
 	}
+
+
+	addStudentToServer(studentName, studentCourse, studentGrade){
+		var ajaxConfigObject = {
+			dataType: 'json',
+			url: "http://s-apis.learningfuze.com/sgt/create",
+			method: "post",
+			data: {"api_key": "Ke3qZVF5U2", "name": studentName, "course": studentCourse, "grade": studentGrade},
+
+			success: this.handleSuccessAddStudentToServer,
+
+			error: this.handleErrorAddStudentToServer,
+		
+		}
+
+		$.ajax(ajaxConfigObject);
+
+	}
+
+	handleSuccessAddStudentToServer(result){
+		console.log("result", result);
+		if(result){
+			this.retrieveData();
+		}
+
+
+	}
+
+	handleErrorAddStudentToServer(result){
+		if(result === "error"){
+			return false;
+		}
+
+	}
+
+	
 
 	/* readStudent -
 		get the data for one or all students
@@ -110,7 +219,18 @@ class SGT_template {
 		a singular Student object if an ID was given, an array of Student objects if no ID was given
 		ESTIMATED TIME: 45 minutes
 	*/
-	readStudent() {
+	readStudent(id) {
+		//console.log('students', Object.values(this.data));
+		if( ! id) {
+			return Object.values(this.data);
+		} else {
+			if(this.doesStudentExist(id)){
+				return this.data[id];
+			}
+			else{
+				return false;
+			}
+		}
 
 	}
 
@@ -127,6 +247,16 @@ class SGT_template {
 	ESTIMATED TIME: 1.5 hours
 	*/
 	displayAllStudents() {
+		$("#displayArea").empty();
+		var studentDetails =  Object.keys(this.data);
+		//console.log("data", studentDetails);
+		
+		for(var key in this.data){
+		
+			$("#displayArea").append(this.data[key].render());
+				
+		}
+		this.displayAverage();
 
 	}
 
@@ -140,6 +270,28 @@ class SGT_template {
 	*/
 
 	displayAverage() {
+
+		
+		var allGrades = Object.keys(this.data);
+		var gradeSum = 0;
+		var avg = 0;
+
+
+		for(var key in this.data){
+			if(isNaN(this.data[key].data.grade)){
+
+				
+			}
+			else{
+				gradeSum += this.data[key].data.grade;
+			}
+			
+		}
+		avg = gradeSum / allGrades.length;
+		avg = avg.toFixed(2);
+		console.log("avg", avg);
+		
+		$(".avgGrade").text(avg);
 
 	}
 
@@ -156,9 +308,50 @@ class SGT_template {
 		true if it was successful, false if not
 		ESTIMATED TIME: 30 minutes
 	*/
-	deleteStudent() {
+	deleteStudentFromServer(id) {
+		// if(this.data[id]){
+		// 	delete this.createStudent();
+		// 	//return true;
+		// }
+		//return false;
+
+		console.log('delete', id);
+		console.log(this.data[id].data.id);
+		console.log(this.data);
+
+		var ajaxConfigObject = {
+			dataType: 'json',
+			url: "http://s-apis.learningfuze.com/sgt/delete",
+			method: "post",
+			data: {api_key: "Ke3qZVF5U2", "student_id": id},
+
+			success: this.handleSuccessDeleteStudentToServer,
+
+			error: this.handleErrorDeleteStudentToServer,
+		
+		}
+
+		$.ajax(ajaxConfigObject);
+			
+	}
+
+	handleSuccessDeleteStudentToServer(result){
+		if(result){
+			console.log('delete success', result	);
+			//this.data;
+			this.retrieveData();
+		}
 
 	}
+
+	handleErrorDeleteStudentToServer(result){
+		if(!result){
+
+			return false;
+		}
+
+	}
+
 
 	/* updateStudent -
 		*** not used for now.  Will be used later ***
@@ -179,4 +372,59 @@ class SGT_template {
 	updateStudent() {
 
 	}
+
+	handleDataFromServer(result){
+		console.log('Handle Data from Server:', result.success);
+		console.log("dataclue", result);
+
+			if(result.success){
+				this.data = {};
+			for(var i = 0; i < result.data.length; i++){
+				var name = result.data[i].name;
+				var course = result.data[i].course;
+				var grade = result.data[i].grade;	
+				var id = result.data[i].id;
+
+				var newstudent = this.createStudent(name, course, grade, id);
+				
+							
+			}
+			
+		}
+			
+		this.displayAllStudents();
+			
+	}
+
+
+	handleError(result){
+		if(!result){
+			return false;
+		}
+	}
+
+
+	retrieveData(){
+		
+		var ajaxConfigObject = {
+			dataType: 'json',
+			url: "http://s-apis.learningfuze.com/sgt/get",
+			method: "post",
+			data: {
+				api_key: "Ke3qZVF5U2"
+			},
+
+			success: this.handleDataFromServer,
+
+			error: this.handleError,
+		
+		}
+
+		$.ajax(ajaxConfigObject);
+
+	}
+
 }
+
+
+	
